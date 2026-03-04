@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>劳动社会学知识问答</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- 配置Tailwind自定义主题 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#f0fdf4',
+                        accent: '#64748b',
+                        correct: '#10b981',
+                        incorrect: '#ef4444'
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .bg-gradient-academic {
+                background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            }
+            .animate-float {
+                animation: float 6s ease-in-out infinite;
+            }
+            @keyframes float {
+                0% { transform: translateY(0px); }
+                50% { transform: translateY(-20px); }
+                100% { transform: translateY(0px); }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-academic min-h-screen text-slate-800">
+    <!-- 漂浮元素 -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden" style="z-index: 0;">
+        <div class="absolute top-1/4 left-1/4 animate-float" style="animation-delay: 0s;">
+            <i class="fa fa-car text-slate-300 text-5xl opacity-30"></i>
+        </div>
+        <div class="absolute top-1/3 right-1/4 animate-float" style="animation-delay: 1s;">
+            <i class="fa fa-cogs text-slate-300 text-5xl opacity-30"></i>
+        </div>
+        <div class="absolute bottom-1/4 left-1/3 animate-float" style="animation-delay: 2s;">
+            <i class="fa fa-scissors text-slate-300 text-5xl opacity-30"></i>
+        </div>
+        <div class="absolute bottom-1/3 right-1/3 animate-float" style="animation-delay: 3s;">
+            <i class="fa fa-briefcase text-slate-300 text-5xl opacity-30"></i>
+        </div>
+        <div class="absolute top-1/2 left-1/2 animate-float" style="animation-delay: 4s;">
+            <i class="fa fa-industry text-slate-300 text-5xl opacity-30"></i>
+        </div>
+    </div>
+    
+    <div class="container mx-auto px-4 py-8 relative" style="z-index: 1;">
+        <!-- 标题区域 -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-800 mb-4 text-shadow">
+                <i class="fa fa-book text-primary mr-3"></i>劳动社会学知识问答
+            </h1>
+            <p class="text-slate-600 text-lg">测试你对劳动社会学的了解程度</p>
+        </header>
+        
+        <!-- 主要内容区域 -->
+        <main class="max-w-3xl mx-auto">
+            <!-- 答题区域 -->
+            <div id="quiz-container" class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+                <!-- 题目进度 -->
+                <div class="mb-8">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-slate-600">题目 <span id="current-question">1</span>/10</span>
+                        <span class="text-slate-600">得分: <span id="score">0</span>/100</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5">
+                        <div id="progress-bar" class="bg-primary h-2.5 rounded-full" style="width: 10%"></div>
+                    </div>
+                </div>
+                
+                <!-- 题目内容 -->
+                <div class="mb-8">
+                    <h2 id="question-text" class="text-2xl font-semibold text-slate-800 mb-6">题目加载中...</h2>
+                    
+                    <!-- 选项 -->
+                    <div id="options-container" class="space-y-4">
+                        <!-- 选项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+                
+                <!-- 解析区域 -->
+                <div id="explanation-container" class="bg-slate-100 rounded-xl p-4 mb-8 hidden">
+                    <h3 class="text-lg font-semibold text-primary mb-2">解析</h3>
+                    <p id="explanation-text" class="text-slate-700"></p>
+                </div>
+                
+                <!-- 按钮区域 -->
+                <div class="flex justify-between">
+                    <button id="prev-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-3 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fa fa-arrow-left mr-2"></i>上一题
+                    </button>
+                    <button id="next-btn" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg transition-all duration-300">
+                        下一题 <i class="fa fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 结果区域 -->
+            <div id="result-container" class="bg-white rounded-2xl shadow-xl p-8 mb-8 hidden">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">答题完成</h2>
+                
+                <div class="text-center mb-8">
+                    <div class="text-6xl font-bold text-primary mb-4" id="final-score">0/100</div>
+                    <p class="text-xl text-slate-700 mb-6" id="result-text">你的得分是0分</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="bg-slate-100 rounded-xl p-4">
+                        <h3 class="text-lg font-semibold text-primary mb-2">结果分析</h3>
+                        <p id="analysis-text" class="text-slate-700"></p>
+                    </div>
+                    
+                    <div class="bg-slate-100 rounded-xl p-4">
+                        <h3 class="text-lg font-semibold text-primary mb-2">学习建议</h3>
+                        <p id="suggestion-text" class="text-slate-700"></p>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-8">
+                    <button id="restart-btn" class="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg transition-all duration-300">
+                        <i class="fa fa-refresh mr-2"></i>重新开始
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // 劳动社会学题目数据
+        const quizData = [
+            {
+                question: "劳动社会学的核心研究对象是什么？",
+                options: [
+                    "劳动者的心理状态",
+                    "劳动与社会的相互关系",
+                    "劳动生产率的提高",
+                    "劳动法律法规"
+                ],
+                answer: 1,
+                explanation: "劳动社会学以劳动和社会的相互关系为研究对象，探讨劳动在社会结构中的地位和作用，以及社会因素对劳动过程的影响。"
+            },
+            {
+                question: "马克思提出的“异化劳动”概念不包括以下哪个方面？",
+                options: [
+                    "劳动者与劳动产品的异化",
+                    "劳动者与劳动过程的异化",
+                    "劳动者与劳动者的异化",
+                    "劳动者与劳动报酬的异化"
+                ],
+                answer: 3,
+                explanation: "马克思的异化劳动理论包括四个方面：劳动者与劳动产品的异化、劳动者与劳动过程的异化、劳动者与劳动者的异化、劳动者与类本质的异化。"
+            },
+            {
+                question: "以下哪个理论强调工作满意度与工作绩效之间的关系？",
+                options: [
+                    "需求层次理论",
+                    "双因素理论",
+                    "期望理论",
+                    "公平理论"
+                ],
+                answer: 1,
+                explanation: "赫茨伯格的双因素理论认为，工作满意度与工作绩效之间存在密切关系，激励因素（如成就感、认可等）能提高员工的工作满意度和绩效。"
+            },
+            {
+                question: "“弹性工作制”属于哪种劳动形式？",
+                options: [
+                    "非正规就业",
+                    "灵活就业",
+                    "远程就业",
+                    "自主就业"
+                ],
+                answer: 1,
+                explanation: "弹性工作制属于灵活就业的一种形式，它允许员工在一定范围内自主安排工作时间，以适应不同的生活需求。"
+            },
+            {
+                question: "以下哪个概念描述了工作对个人身份认同的影响？",
+                options: [
+                    "工作嵌入",
+                    "工作异化",
+                    "工作认同",
+                    "工作满意度"
+                ],
+                answer: 2,
+                explanation: "工作认同指的是个人对自己所从事工作的认同程度，以及工作对个人身份认同的影响。"
+            },
+            {
+                question: "“职业倦怠”最早由谁提出？",
+                options: [
+                    "马克思",
+                    "韦伯",
+                    "弗洛姆",
+                    "弗鲁顿伯格"
+                ],
+                answer: 3,
+                explanation: "职业倦怠（Burnout）最早由美国心理学家赫伯特·弗鲁顿伯格（Herbert Freudenberger）在1974年提出，用于描述工作压力导致的身心疲惫状态。"
+            },
+            {
+                question: "以下哪个理论强调社会网络对职业发展的影响？",
+                options: [
+                    "人力资本理论",
+                    "社会资本理论",
+                    "信号理论",
+                    "筛选理论"
+                ],
+                answer: 1,
+                explanation: "社会资本理论强调社会网络和人际关系对职业发展的重要影响，认为个人的社会资源可以转化为职业优势。"
+            },
+            {
+                question: "“零工经济”的主要特征不包括以下哪项？",
+                options: [
+                    "短期合同",
+                    "灵活工作时间",
+                    "固定雇主",
+                    "项目制工作"
+                ],
+                answer: 2,
+                explanation: "零工经济的主要特征包括短期合同、灵活工作时间、项目制工作等，通常没有固定雇主。"
+            },
+            {
+                question: "以下哪个概念描述了工作与家庭之间的冲突？",
+                options: [
+                    "工作家庭边界",
+                    "工作家庭冲突",
+                    "工作家庭平衡",
+                    "工作家庭溢出"
+                ],
+                answer: 1,
+                explanation: "工作家庭冲突指的是工作和家庭角色之间的相互干扰，导致个人在两个领域都难以有效履行职责。"
+            },
+            {
+                question: "劳动社会学研究中常用的定量研究方法不包括以下哪项？",
+                options: [
+                    "问卷调查",
+                    "访谈法",
+                    "实验法",
+                    "统计分析"
+                ],
+                answer: 1,
+                explanation: "访谈法属于定性研究方法，而问卷调查、实验法和统计分析属于定量研究方法。"
+            }
+        ];
+        
+        // 全局变量
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedOption = null;
+        let isAnswered = false;
+        
+        // 获取DOM元素
+        const quizContainer = document.getElementById('quiz-container');
+        const resultContainer = document.getElementById('result-container');
+        const currentQuestionEl = document.getElementById('current-question');
+        const scoreEl = document.getElementById('score');
+        const progressBarEl = document.getElementById('progress-bar');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const explanationContainerEl = document.getElementById('explanation-container');
+        const explanationTextEl = document.getElementById('explanation-text');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const finalScoreEl = document.getElementById('final-score');
+        const resultTextEl = document.getElementById('result-text');
+        const analysisTextEl = document.getElementById('analysis-text');
+        const suggestionTextEl = document.getElementById('suggestion-text');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        // 初始化题目
+        function initQuestion() {
+            const question = quizData[currentQuestion];
+            currentQuestionEl.textContent = currentQuestion + 1;
+            scoreEl.textContent = score;
+            progressBarEl.style.width = `${(currentQuestion + 1) * 10}%`;
+            
+            questionTextEl.textContent = question.question;
+            optionsContainerEl.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionEl = document.createElement('div');
+                optionEl.className = `bg-slate-100 rounded-xl p-4 cursor-pointer card-hover ${selectedOption === index ? (index === question.answer ? 'bg-correct/20 border-2 border-correct' : 'bg-incorrect/20 border-2 border-incorrect') : ''}`;
+                optionEl.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-200 mr-3">${index + 1}</span>
+                        <span>${option}</span>
+                        ${selectedOption === index ? (index === question.answer ? '<i class="fa fa-check text-correct ml-auto"></i>' : '<i class="fa fa-times text-incorrect ml-auto"></i>') : ''}
+                    </div>
+                `;
+                optionEl.addEventListener('click', () => selectOption(index));
+                optionsContainerEl.appendChild(optionEl);
+            });
+            
+            explanationContainerEl.style.display = isAnswered ? 'block' : 'none';
+            if (isAnswered) {
+                explanationTextEl.textContent = question.explanation;
+            }
+            
+            // 控制按钮状态
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.textContent = currentQuestion === quizData.length - 1 ? '提交答案' : '下一题';
+            nextBtn.disabled = !isAnswered;
+        }
+        
+        // 选择选项
+        function selectOption(index) {
+            if (isAnswered) return;
+            
+            selectedOption = index;
+            isAnswered = true;
+            
+            const question = quizData[currentQuestion];
+            if (index === question.answer) {
+                score += 10;
+            }
+            
+            initQuestion();
+            
+            // 显示解析
+            explanationTextEl.textContent = question.explanation;
+            explanationContainerEl.style.display = 'block';
+        }
+        
+        // 下一题
+        function nextQuestion() {
+            if (!isAnswered) {
+                alert('请先选择一个选项');
+                return;
+            }
+            
+            // 重置状态
+            selectedOption = null;
+            isAnswered = false;
+            
+            // 检查是否完成所有题目
+            if (currentQuestion === quizData.length - 1) {
+                showResult();
+                return;
+            }
+            
+            // 进入下一题
+            currentQuestion++;
+            initQuestion();
+        }
+        
+        // 上一题
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                selectedOption = null;
+                isAnswered = false;
+                initQuestion();
+            }
+        }
+        
+        // 显示结果
+        function showResult() {
+            quizContainer.style.display = 'none';
+            resultContainer.style.display = 'block';
+            
+            finalScoreEl.textContent = `${score}/100`;
+            
+            // 根据得分显示不同的结果
+            let resultText, analysisText, suggestionText;
+            
+            if (score >= 90) {
+                resultText = '优秀！你对劳动社会学有深入的了解。';
+                analysisText = '你的得分表明你对劳动社会学的核心概念和理论有全面的掌握，能够准确回答各种问题。';
+                suggestionText = '建议你继续深入研究劳动社会学的前沿问题，关注当前劳动领域的热点话题，如零工经济、工作家庭平衡等。';
+            } else if (score >= 70) {
+                resultText = '良好！你对劳动社会学有较好的了解。';
+                analysisText = '你的得分表明你对劳动社会学的主要概念和理论有基本的掌握，但在一些细节问题上还需要加强。';
+                suggestionText = '建议你系统学习劳动社会学的经典著作，深入理解核心理论，并关注当前劳动领域的发展动态。';
+            } else if (score >= 50) {
+                resultText = '及格！你对劳动社会学有基本的了解。';
+                analysisText = '你的得分表明你对劳动社会学的基本概念有一定的了解，但在理论深度和广度上还有待提高。';
+                suggestionText = '建议你从基础教材开始系统学习劳动社会学，逐步建立对劳动社会学的整体认识，并通过阅读相关文献拓展知识面。';
+            } else {
+                resultText = '需要努力！你对劳动社会学的了解还比较有限。';
+                analysisText = '你的得分表明你对劳动社会学的基本概念和理论还不够熟悉，需要加强学习。';
+                suggestionText = '建议你从基础开始学习劳动社会学，先了解劳动社会学的研究对象、基本概念和主要理论，逐步建立对劳动社会学的认识。';
+            }
+            
+            resultTextEl.textContent = resultText;
+            analysisTextEl.textContent = analysisText;
+            suggestionTextEl.textContent = suggestionText;
+        }
+        
+        // 重新开始
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            selectedOption = null;
+            isAnswered = false;
+            
+            quizContainer.style.display = 'block';
+            resultContainer.style.display = 'none';
+            
+            initQuestion();
+        }
+        
+        // 事件监听
+        prevBtn.addEventListener('click', prevQuestion);
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', restartQuiz);
+        
+        // 初始化
+        initQuestion();
+    </script>
+</body>
+</html>
